@@ -29,7 +29,6 @@ class LoadBalancer:
                 self.facilities.append({AMT: amount, ITR: interest_rate,
                     FID: fid, BID: bid})
         self.facilities = sorted(self.facilities, key=lambda f: f[ITR])
-        print(self.facilities)
 
     def read_covenants(self, filename):
         with open(filename, newline='') as csvfile:
@@ -48,7 +47,6 @@ class LoadBalancer:
                             }
                 self.covenants[bid][fid][MDL] = min(mdl, self.covenants[bid][fid][MDL])
                 self.covenants[bid][fid][BNS].add(banned_state)
-        print(self.covenants)
 
     def process(self, loan_fn, assignment_fn, yields_fn):
         with open(loan_fn, newline='') as loan_file:
@@ -67,8 +65,6 @@ class LoadBalancer:
                         DL: default_likelihood,
                         'state': state}
                 self.assign_loan(loan, assignment, yields)
-        print(assignment)
-        print(yields)
         self.write_assignment(assignment, assignment_fn)
         self.write_yields(yields, yields_fn)
 
@@ -105,10 +101,7 @@ class LoadBalancer:
             if fid not in yields:
                 yields[fid] = 0
             yields[fid] += (1 - loan[DL]) * loan[UIR] * loan[AMT] - loan[DL] * loan[AMT] - facility[ITR] * loan[AMT]
-
-
-
-
+            break
 
 
 def main():
