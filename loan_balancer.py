@@ -12,6 +12,8 @@ AMT = 'amount'
 BNS = 'banned_state'
 ID = 'id'
 EY = 'expected_yield'
+ST = 'state'
+
 class LoadBalancer:
     def __init__(self):
         self.banks = {}
@@ -58,12 +60,12 @@ class LoadBalancer:
                 amount = int(row[AMT])
                 loan_id = int(row[ID])
                 default_likelihood = float(row[DL])
-                state = row['state']
+                state = row[ST]
                 loan = {UIR: user_interest_rate,
                         AMT: amount,
                         LID: loan_id,
                         DL: default_likelihood,
-                        'state': state}
+                        ST: state}
                 self.assign_loan(loan, assignment, yields)
         self.write_assignment(assignment, assignment_fn)
         self.write_yields(yields, yields_fn)
@@ -83,7 +85,7 @@ class LoadBalancer:
                 writer.writerow({FID: fid, EY: round(ey)})
 
     def respect_covenant(self, loan, covenant):
-        return covenant[MDL] >= loan[DL] and loan['state'] not in covenant[BNS]
+        return covenant[MDL] >= loan[DL] and loan[ST] not in covenant[BNS]
 
     def assign_loan(self, loan, assignment, yields):
         for fidx in range(len(self.facilities)):
@@ -102,6 +104,8 @@ class LoadBalancer:
                 yields[fid] = 0
             yields[fid] += (1 - loan[DL]) * loan[UIR] * loan[AMT] - loan[DL] * loan[AMT] - facility[ITR] * loan[AMT]
             break
+        if loan[LID] not in assignment:
+            assignment[loan[LID]] = ''
 
 
 def main():
