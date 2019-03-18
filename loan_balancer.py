@@ -14,7 +14,7 @@ ID = 'id'
 EY = 'expected_yield'
 ST = 'state'
 
-class LoadBalancer:
+class LoanBalancer:
     def __init__(self):
         self.banks = {}
         self.facilities = []    # ordered by facility interest rate
@@ -82,27 +82,31 @@ class LoadBalancer:
             writer = csv.DictWriter(yields_file, fieldnames=[FID, EY])
             writer.writeheader()
             for fid, ey in yields.items():
-                writer.writerow({FID: fid, EY: round(ey)})
+                writer.writerow({FID: fid, EY: ey})
 
     def respect_covenant(self, loan, covenant):
         return covenant[MDL] >= loan[DL] and loan[ST] not in covenant[BNS]
 
     def assign_loan(self, loan, assignment, yields):
+        #print('---- loan = {}'.format(loan))
         for fidx in range(len(self.facilities)):
             facility = self.facilities[fidx]
+            #print('---- facility = {}'.format(facility))
             if facility[AMT] < loan[AMT]:
                 continue
             bid = facility[BID]
             fid = facility[FID]
+            #print('---- covenant = {}'.format(self.covenants[bid][fid]))
             if fid in self.covenants[bid] and not self.respect_covenant(loan, self.covenants[bid][fid]):
                 continue
             if -1 in self.covenants[bid] and not self.respect_covenant(loan, self.covenants[bid][-1]):
                 continue
+            #print('---- found fid = {}'.format(fid))
             self.facilities[fidx][AMT] -= loan[AMT]
             assignment[loan[LID]] = fid
             if fid not in yields:
                 yields[fid] = 0
-            yields[fid] += (1 - loan[DL]) * loan[UIR] * loan[AMT] - loan[DL] * loan[AMT] - facility[ITR] * loan[AMT]
+            yields[fid] += round((1 - loan[DL]) * loan[UIR] * loan[AMT] - loan[DL] * loan[AMT] - facility[ITR] * loan[AMT])
             break
         if loan[LID] not in assignment:
             assignment[loan[LID]] = ''
@@ -119,7 +123,7 @@ def main():
     parser.add_argument('--yields', dest='yields', default='yields.csv')
     args = parser.parse_args()
 
-    loan_balancer = LoadBalancer()
+    loan_balancer = LoanBalancer()
     loan_balancer.read_facilities(args.data_dir + '/' + args.facilities)
     loan_balancer.read_covenants(args.data_dir + '/' + args.covenants)
     loan_balancer.process(args.data_dir + '/' + args.loans,
