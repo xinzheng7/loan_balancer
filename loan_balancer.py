@@ -16,9 +16,8 @@ ST = 'state'
 
 class LoanBalancer:
     def __init__(self):
-        self.banks = {}
         self.facilities = []    # ordered by facility interest rate
-        self.covenants = {}
+        self.covenants = {}     # keyed by bank_id, then facility_id.
 
     def read_facilities(self, filename):
         with open(filename, newline='') as csvfile:
@@ -30,12 +29,14 @@ class LoanBalancer:
                 bid = int(row[BID])
                 self.facilities.append({AMT: amount, ITR: interest_rate,
                     FID: fid, BID: bid})
+        # Ordered by facility interest rate (low to high)
         self.facilities = sorted(self.facilities, key=lambda f: f[ITR])
 
     def read_covenants(self, filename):
         with open(filename, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
+                # Use '-1' to denote all fid in that bank.
                 fid = -1 if not len(row[FID]) else int(row[FID])
                 mdl = 1.0 if not len(row[MDL]) else float(row[MDL])
                 bid = int(row[BID])
@@ -88,20 +89,18 @@ class LoanBalancer:
         return covenant[MDL] >= loan[DL] and loan[ST] not in covenant[BNS]
 
     def assign_loan(self, loan, assignment, yields):
-        #print('---- loan = {}'.format(loan))
         for fidx in range(len(self.facilities)):
             facility = self.facilities[fidx]
-            #print('---- facility = {}'.format(facility))
             if facility[AMT] < loan[AMT]:
                 continue
             bid = facility[BID]
             fid = facility[FID]
-            #print('---- covenant = {}'.format(self.covenants[bid][fid]))
-            if fid in self.covenants[bid] and not self.respect_covenant(loan, self.covenants[bid][fid]):
+            if (fid in self.covenants[bid] and
+                    not self.respect_covenant(loan, self.covenants[bid][fid)]):
                 continue
-            if -1 in self.covenants[bid] and not self.respect_covenant(loan, self.covenants[bid][-1]):
+            if (-1 in self.covenants[bid] and
+                    not self.respect_covenant(loan, self.covenants[bid][-1])):
                 continue
-            #print('---- found fid = {}'.format(fid))
             self.facilities[fidx][AMT] -= loan[AMT]
             assignment[loan[LID]] = fid
             if fid not in yields:
@@ -115,7 +114,6 @@ class LoanBalancer:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', dest='data_dir')
-    parser.add_argument('--banks', dest='banks', default='banks.csv')
     parser.add_argument('--facilities', dest='facilities', default='facilities.csv')
     parser.add_argument('--covenants', dest='covenants', default='covenants.csv')
     parser.add_argument('--loans', dest='loans', default='loans.csv')
