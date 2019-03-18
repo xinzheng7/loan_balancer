@@ -33,7 +33,8 @@ It took me 2.5 hours to write the code and another 0.5 hour to work on unittests
 Make covenant a class which define a common API called Convenant.check_convenant(loan, facility). A new types of convenant would just inherit this class and implement the API.
 
 ### How would you architect your solution as a production service wherein new facilities can be introduced at arbitrary points in time. Assume these facilities become available by the finance team emailing your team and describing the addition with a new set of CSVs.
-    The code need to be productionalized as a service which listen to either REST API or thrift API calls. Each time a new CSV comes in, the code will process the CSV and return to stand-by mode waiting for the next call. If the traffic is high, we want to use multi threads to handle simultaneous/overlapping API calls. The status of facilities will need to be persistant. Suggest using DB to store the transactions and current status.
+
+The code need to be productionalized as a service which listen to either REST API or thrift API calls. Each time a new CSV comes in, the code will process the CSV and return to stand-by mode waiting for the next call. If the traffic is high, we want to use multi threads to handle simultaneous/overlapping API calls. The status of facilities will need to be persistant. Suggest using DB to store the transactions and current status.
 
 ### Your solution most likely simulates the streaming process by directly calling a method in your code to process the loans inside of a for loop. What would a REST API look like for this same service? Stakeholders using the API will need, at a minimum, to be able to request a loan be assigned to a facility, and read the funding status of a loan, as well as query the capacities remaining in facilities.
 
