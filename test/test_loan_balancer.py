@@ -93,7 +93,5 @@ class TestLoanBalancer(unittest.TestCase):
         self.assertEqual({301: ''}, assignment)
 
 
-
-
 if __name__ == '__main__':
     unittest.main()

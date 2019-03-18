@@ -11,7 +11,7 @@ solution has been renamed as `assignments_solution.csv` and `yields_solution.csv
     diff -w small/yields.csv small/yields_solution.csv
     ```
 
-- Run large data set
+- Run large data set. The output can be found at `large/assignments.csv` and `large/yields.csv`.
     ```
     cd loan_balancer
     python loan_balancer.py --data_dir=large
